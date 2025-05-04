@@ -28,7 +28,9 @@ def check_dependencies():
             print("WARNING: ffmpeg not found. Audio extraction will fail.")
             return False
         
-        print(f"Found ffmpeg: {ffmpeg_version.stdout.split('\\n')[0]}")
+        # Get first line of output without using backslash in f-string
+        first_line = ffmpeg_version.stdout.split('\n')[0] if ffmpeg_version.stdout else "Unknown version"
+        print(f"Found ffmpeg: {first_line}")
         return True
     except Exception as e:
         print(f"WARNING: Error checking dependencies: {e}")
