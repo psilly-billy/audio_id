@@ -86,22 +86,6 @@ The web interface includes options to:
 - Keep temporary files (optional)
 - Manually clean up temporary files
 
-## Deployment on Streamlit Cloud
-
-1. Fork this repository to your GitHub account
-
-2. Create a [Streamlit Cloud](https://streamlit.io/cloud) account and connect it to your GitHub
-
-3. Deploy the app by selecting your repository and setting the main file as `app.py`
-
-4. Set up your secrets in the Streamlit Cloud dashboard:
-   - Go to your app's settings
-   - Under "Secrets", add the following:
-   ```
-   HF_TOKEN = "your_huggingface_token_here"
-   ```
-
-5. Deploy and enjoy!
 
 ## Requirements
 

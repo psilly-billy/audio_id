@@ -1,6 +1,7 @@
 import streamlit as st
 import os
 import sys
+import subprocess
 
 # Configure error handling
 st.set_page_config(
@@ -9,12 +10,70 @@ st.set_page_config(
     layout="wide",
 )
 
+# Check for required system dependencies
+def check_system_dependencies():
+    """Check if required system dependencies are installed and show warnings"""
+    missing_deps = []
+    
+    # Check for ffmpeg
+    try:
+        ffmpeg_result = subprocess.run(
+            ["ffmpeg", "-version"], 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.PIPE, 
+            text=True, 
+            check=False
+        )
+        if ffmpeg_result.returncode != 0:
+            missing_deps.append("ffmpeg")
+    except Exception:
+        missing_deps.append("ffmpeg")
+    
+    # Check for yt-dlp
+    try:
+        ytdlp_result = subprocess.run(
+            ["yt-dlp", "--version"], 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.PIPE, 
+            text=True, 
+            check=False
+        )
+        if ytdlp_result.returncode != 0:
+            missing_deps.append("yt-dlp")
+    except Exception:
+        missing_deps.append("yt-dlp")
+    
+    return missing_deps
+
 # Title and description
 st.title("🎤 Video Accent Analyzer")
 st.markdown("""
 This app analyzes videos to identify speaker accents using efficient speech recognition and linguistic analysis.
 Simply provide a video URL (YouTube, etc.) and click 'Analyze'.
 """)
+
+# Check dependencies early
+missing_deps = check_system_dependencies()
+if missing_deps:
+    st.error(f"""
+    ⚠️ Missing System Dependencies: {', '.join(missing_deps)}
+    
+    This app requires these programs to be installed on the system:
+    - ffmpeg: For audio extraction and processing
+    - yt-dlp: For video download
+    
+    If running on Streamlit Cloud, please ensure packages.txt includes these dependencies.
+    """)
+    
+    # Show packages.txt info
+    with st.expander("How to fix on Streamlit Cloud"):
+        st.code("""
+# Create a file named packages.txt with:
+ffmpeg
+youtube-dl
+
+# Make sure this file is in your repository root
+        """)
 
 # Set up environment variables
 def setup_environment():
@@ -117,6 +176,12 @@ with st.form("video_form"):
 # Process video when form is submitted
 if submit_button and video_url:
     try:
+        # Double check dependencies again
+        missing_deps = check_system_dependencies()
+        if missing_deps:
+            st.error(f"Cannot proceed: Missing system dependencies: {', '.join(missing_deps)}")
+            st.stop()
+            
         with st.spinner("Processing video... This may take a minute."):
             # Set duration to None if analyzing full video
             duration = None if use_full_video else sample_duration
@@ -192,6 +257,12 @@ if submit_button and video_url:
     except Exception as e:
         st.error(f"Error processing video: {e}")
         st.error("Please check the URL and try again.")
+        
+        # Show detailed error in expander
+        with st.expander("Detailed Error Information"):
+            st.code(str(e))
+            import traceback
+            st.code(traceback.format_exc())
 else:
     if submit_button:  # Form was submitted but URL is empty
         st.warning("Please enter a video URL to analyze.")

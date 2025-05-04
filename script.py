@@ -10,8 +10,29 @@ import librosa
 import numpy as np
 import uuid
 import shutil
+import sys
 from collections import Counter
 from functools import lru_cache
+
+# Check for required system dependencies
+def check_dependencies():
+    """Check if required system dependencies are installed"""
+    try:
+        # Check for ffmpeg
+        ffmpeg_version = subprocess.run(["ffmpeg", "-version"], 
+                                       stdout=subprocess.PIPE, 
+                                       stderr=subprocess.PIPE, 
+                                       text=True, 
+                                       check=False)
+        if ffmpeg_version.returncode != 0:
+            print("WARNING: ffmpeg not found. Audio extraction will fail.")
+            return False
+        
+        print(f"Found ffmpeg: {ffmpeg_version.stdout.split('\\n')[0]}")
+        return True
+    except Exception as e:
+        print(f"WARNING: Error checking dependencies: {e}")
+        return False
 
 # For handling environment variables and config
 def get_hf_token():
@@ -70,7 +91,7 @@ def download_video(video_url, output_dir="downloads", session_id=None):
     # Return the path to the downloaded file
     return downloaded_files[0], session_id
 
-# Audio Extraction Module using FFmpeg
+# Extract audio from video with better error handling
 def extract_audio(video_path, audio_format="wav", output_dir="audio", duration=None, session_id=None):
     """
     Extract audio from video with optional duration limit
@@ -97,6 +118,18 @@ def extract_audio(video_path, audio_format="wav", output_dir="audio", duration=N
     
     print(f"Extracting audio from {video_path} to {audio_path}")
     
+    # First check if ffmpeg is available
+    try:
+        # Test ffmpeg
+        subprocess.run(["ffmpeg", "-version"], 
+                      stdout=subprocess.PIPE, 
+                      stderr=subprocess.PIPE, 
+                      check=True)
+    except (subprocess.SubprocessError, FileNotFoundError) as e:
+        error_msg = f"ERROR: ffmpeg is not installed or not found in PATH. Audio extraction failed: {e}"
+        print(error_msg)
+        raise RuntimeError(error_msg)
+    
     # Basic command
     command = ["ffmpeg", "-i", video_path, "-ac", "1", "-ar", "16000"]
     
@@ -108,8 +141,13 @@ def extract_audio(video_path, audio_format="wav", output_dir="audio", duration=N
     # Add output path
     command.append(audio_path)
     
-    subprocess.run(command, check=True)
-    return audio_path, session_id
+    try:
+        subprocess.run(command, check=True)
+        return audio_path, session_id
+    except subprocess.SubprocessError as e:
+        error_msg = f"Error extracting audio: {e}"
+        print(error_msg)
+        raise RuntimeError(error_msg)
 
 # Check if GPU is available
 def is_gpu_available():
@@ -514,11 +552,14 @@ def cleanup_files(session_id=None, keep_results=False):
     except Exception as e:
         print(f"Error during cleanup: {e}")
 
-# Main workflow
+# Main workflow with dependency check
 def run_accent_analysis(video_url, sample_duration=60, cleanup=True):
     """Run the full accent analysis pipeline"""
     session_id = generate_session_id()
     print(f"Starting analysis session: {session_id}")
+    
+    # Check dependencies first
+    check_dependencies()
     
     try:
         print(f"Downloading video from: {video_url}")
@@ -558,6 +599,9 @@ if __name__ == "__main__":
         load_dotenv()
     except ImportError:
         pass  # dotenv is optional
+    
+    # Check dependencies
+    check_dependencies()
     
     parser = argparse.ArgumentParser(description="Analyze accents in a video")
     parser.add_argument("--video_url", type=str, help="URL of the video to analyze")
