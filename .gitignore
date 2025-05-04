@@ -1,0 +1,43 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Local configuration files
+config.py
+.env
+
+# Downloaded content and temporary files
+downloads/
+audio/
+audio_segments/
+
+# Streamlit specific
+.streamlit/secrets.toml
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs and databases
+*.log
+*.sqlite
+
+# Hugging Face cache
+.cache/
+.huggingface/ 

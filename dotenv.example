@@ -1,0 +1,6 @@
+# Hugging Face token for model download
+# Get your token from: https://huggingface.co/settings/tokens
+HF_TOKEN=your_huggingface_token_here
+
+# Optional: Additional environment variables
+# MODEL_ID=distil-whisper/distil-large-v3.5 
