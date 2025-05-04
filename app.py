@@ -10,6 +10,46 @@ st.set_page_config(
     layout="wide",
 )
 
+# Add custom styling for app header
+st.markdown("""
+<style>
+    .app-header {
+        background-color: #2c3e50;
+        padding: 25px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .app-header h1 {
+        color: white;
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+    .app-header p {
+        color: #ddd;
+        font-size: 1.1rem;
+        margin-bottom: 0;
+    }
+    .stButton>button {
+        background-color: #007acc;
+        color: white;
+        font-weight: bold;
+    }
+    .stButton>button:hover {
+        background-color: #005c99;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Title and description with custom styling
+st.markdown("""
+<div class="app-header">
+    <h1>🎤 Video Accent Analyzer</h1>
+    <p>Analyze videos to identify speaker accents using efficient speech recognition and linguistic pattern analysis.</p>
+</div>
+""", unsafe_allow_html=True)
+
 # Check for required system dependencies
 def check_system_dependencies():
     """Check if required system dependencies are installed and show warnings"""
@@ -44,13 +84,6 @@ def check_system_dependencies():
         missing_deps.append("yt-dlp")
     
     return missing_deps
-
-# Title and description
-st.title("🎤 Video Accent Analyzer")
-st.markdown("""
-This app analyzes videos to identify speaker accents using efficient speech recognition and linguistic analysis.
-Simply provide a video URL (YouTube, etc.) and click 'Analyze'.
-""")
 
 # Check dependencies early
 missing_deps = check_system_dependencies()
@@ -195,6 +228,51 @@ if submit_button and video_url:
             # Show results
             st.subheader("Analysis Results")
             
+            # Add custom CSS for better styling
+            st.markdown("""
+            <style>
+            .accent-box {
+                background-color: #2e4057;
+                border-radius: 10px;
+                padding: 20px;
+                margin: 10px 0;
+                color: white;
+            }
+            .accent-label {
+                font-size: 1.2rem;
+                color: #e8f1f2;
+                font-weight: bold;
+            }
+            .accent-value {
+                font-size: 1.5rem;
+                color: #ffcc66;
+                font-weight: bold;
+                margin-left: 10px;
+            }
+            .confidence-high {
+                color: #5cb85c;
+                font-weight: bold;
+            }
+            .confidence-medium {
+                color: #f0ad4e;
+                font-weight: bold;
+            }
+            .confidence-low {
+                color: #d9534f;
+                font-weight: bold;
+            }
+            .transcript-box {
+                background-color: #121212;
+                color: #e0e0e0;
+                border-radius: 8px;
+                padding: 15px;
+                margin: 15px 0;
+                font-family: 'Courier New', monospace;
+                border-left: 5px solid #66a3ff;
+            }
+            </style>
+            """, unsafe_allow_html=True)
+            
             # Process results by speaker
             speakers = {}
             for result in results:
@@ -212,14 +290,19 @@ if submit_button and video_url:
                 # Create a nice display
                 st.markdown(f"### Speaker {speaker.replace('SPEAKER_', '')}")
                 
-                # Show accent with confidence
-                accent_col, conf_col = st.columns([2, 1])
-                with accent_col:
-                    st.markdown(f"**Detected Accent:** {combined_accent}")
-                with conf_col:
-                    # Color based on confidence
-                    color = "green" if combined_confidence >= 70 else "orange" if combined_confidence >= 50 else "red"
-                    st.markdown(f"**Confidence:** <span style='color:{color}'>{combined_confidence:.1f}%</span>", unsafe_allow_html=True)
+                # Determine confidence class
+                confidence_class = "confidence-high" if combined_confidence >= 70 else "confidence-medium" if combined_confidence >= 50 else "confidence-low"
+                
+                # Show accent with confidence in styled box
+                st.markdown(f"""
+                <div class="accent-box">
+                    <span class="accent-label">Detected Accent:</span>
+                    <span class="accent-value">{combined_accent}</span>
+                    <br/>
+                    <span class="accent-label">Confidence:</span>
+                    <span class="{confidence_class}">{combined_confidence:.1f}%</span>
+                </div>
+                """, unsafe_allow_html=True)
                 
                 # Display a formatted transcript from all segments
                 st.markdown("#### Transcript:")
@@ -228,13 +311,13 @@ if submit_button and video_url:
                 for segment in segments:
                     transcript_text += segment["transcription"] + " "
                 
-                st.markdown(f"<div style='background-color:#f0f2f6;padding:10px;border-radius:5px'>{transcript_text}</div>", unsafe_allow_html=True)
+                st.markdown(f'<div class="transcript-box">{transcript_text}</div>', unsafe_allow_html=True)
                 
                 # Show the individual segments in an expandable section
                 with st.expander("Show Individual Segments"):
                     for i, segment in enumerate(segments):
                         st.markdown(f"**Segment {i+1}** ({segment['start']:.1f}s - {segment['end']:.1f}s):")
-                        st.text(segment["transcription"])
+                        st.markdown(f'<div class="transcript-box">{segment["transcription"]}</div>', unsafe_allow_html=True)
                     
                 st.markdown("---")
             
@@ -278,14 +361,13 @@ st.markdown("Supports Italian, Spanish, French, German, Russian, Indian, Chinese
 with st.sidebar:
     st.subheader("About")
     st.markdown("""
-    ### 2025 Enhanced Accent Detection
+    ### Accent Detection
     
-    This app uses advanced speech technologies:
+    This app uses:
     - yt-dlp for video download
     - FFmpeg for audio extraction
     - Distil-Whisper for high-accuracy transcription
-    - Advanced linguistic pattern analysis for accent detection
-    - Weighted confidence aggregation across segments
+    
     
     Supported accents:
     - American, British

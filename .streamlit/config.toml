@@ -4,4 +4,12 @@ fileWatcherType = "none"
 
 [runner]
 # Increase timeout for video processing
-fastReruns = false 
+fastReruns = false
+
+[theme]
+# Custom theme for a professional look
+primaryColor = "#007acc"
+backgroundColor = "#0e1117"
+secondaryBackgroundColor = "#1e2530"
+textColor = "#e0e0e0"
+font = "sans serif" 

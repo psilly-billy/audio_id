@@ -1,6 +1,6 @@
 # 🎤 Advanced Video Accent Analyzer
 
-A powerful application for detecting and analyzing accents in video content using efficient speech recognition and linguistic pattern analysis technology.
+ Test application for detecting and analyzing accents in video content using efficient speech recognition and linguistic pattern analysis technology.
 
 ## Features
 
@@ -67,7 +67,7 @@ Distil-Whisper is a knowledge-distilled version of OpenAI's Whisper-Large-v3, of
 
 ### Command Line
 ```
-python script.py --video_url "https://example.com/video.mp4" --duration 60
+python script.py --video_url "https://example.com/video.mp4" --duration 20
 ```
 
 Optional arguments:
