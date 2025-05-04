@@ -241,23 +241,34 @@ def load_speech_model():
         # Use Distil-Whisper model - more efficient than Whisper Large
         model_id = "distil-whisper/distil-large-v3.5"
         
+        # Handle torch CPU/GPU quirks
+        torch_dtype = None
+        if torch.cuda.is_available():
+            torch_dtype = torch.float16
+            print("Using float16 precision with GPU")
+        else:
+            # Use default dtype for CPU
+            print("Using default precision with CPU")
+        
         # Load the model and processor with auth token if available
+        kwargs = {
+            "low_cpu_mem_usage": True
+        }
+        
+        # Only add torch_dtype if it's set (avoids errors on some platforms)
+        if torch_dtype is not None:
+            kwargs["torch_dtype"] = torch_dtype
+            
+        # Add token if available
         if hf_token:
+            kwargs["token"] = hf_token
             processor = AutoProcessor.from_pretrained(model_id, token=hf_token)
-            model = AutoModelForSpeechSeq2Seq.from_pretrained(
-                model_id,
-                torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
-                low_cpu_mem_usage=True,
-                token=hf_token
-            )
         else:
             # Attempt to load without token (for public models)
             processor = AutoProcessor.from_pretrained(model_id)
-            model = AutoModelForSpeechSeq2Seq.from_pretrained(
-                model_id,
-                torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
-                low_cpu_mem_usage=True
-            )
+            
+        # Load model with appropriate kwargs
+        model = AutoModelForSpeechSeq2Seq.from_pretrained(model_id, **kwargs)
         
         # Move model to the appropriate device
         model = model.to(device)

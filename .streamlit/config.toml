@@ -1,0 +1,7 @@
+[server]
+# Disable the watchdog component - prevents torch._classes errors
+fileWatcherType = "none"
+
+[runner]
+# Increase timeout for video processing
+fastReruns = false 
